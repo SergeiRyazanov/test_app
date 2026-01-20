@@ -11,7 +11,7 @@ class WithImageCell: UITableViewCell {
         return $0
     }(UIButton())
     
-    var openNewScreenHandler: (() -> Void)?
+    var openNewScreenHandler: ((UIImage) -> Void)?
     
     //фон ячейки
     var cellColor: UIView = {
@@ -67,16 +67,30 @@ class WithImageCell: UITableViewCell {
         spinner.startAnimating()
     }
     
+    private var downloadedImage: UIImage?
     private func downloadImage(from urlString: String) {
         
         if let url = URL(string: urlString) {
         
         URLSession.shared.dataTask(with: url) { [weak self] (data, _, _) in
-            if let data = data {
+            
+            var image: UIImage?
+            if let data = data, let img = UIImage(data: data) {
                 
+                image = UIImage(data: data)!
+                self?.downloadedImage = image
                 DispatchQueue.main.async {
-                //узнать почему тормозит приложение без этого метода
-                    self?.cellImage.image = UIImage(data: data) ?? UIImage(named: "reserveImage")
+                    
+                    self?.cellImage.image = image
+                    self?.spinner.stopAnimating()
+                }
+            } else {
+                
+                image = UIImage(named: "reserveImage")
+                self?.downloadedImage = image
+                DispatchQueue.main.async {
+                    
+                    self?.cellImage.image = image
                     self?.spinner.stopAnimating()
                 }
             }
@@ -85,7 +99,8 @@ class WithImageCell: UITableViewCell {
 }
     
     func setupCell(post: DataSourceForWithImageCell) {
-       
+        
+        cellImage.image = nil
         downloadImage(from: post.image)
         cellName.text = post.name
         openNewScreenHandler = post.openNewScreenHadler
@@ -93,7 +108,10 @@ class WithImageCell: UITableViewCell {
    
    @objc private func openNewScreen() {
        //сделать чтобы замыкание передавало картинку на второй экран
-       openNewScreenHandler?()
+       if let image = downloadedImage{
+           
+           openNewScreenHandler?(image)
+       }
    }
     
     private func setupConstraints() {

@@ -2,10 +2,10 @@ import UIKit
 
 class PageAboutCell: UIViewController {
     
-    var imageName: String?
+    var image: UIImage?
     var titleText: String?
 
-    private let imageView: UIImageView = {
+    private var imageView: UIImageView = {
         
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.contentMode = .scaleAspectFit
@@ -13,31 +13,16 @@ class PageAboutCell: UIViewController {
     }(UIImageView())
     
     override func viewDidLoad() {
-        
-        super.viewDidLoad()
-        view.addSubview(imageView)
-        view.backgroundColor = .white
-        title = titleText
-        
-        setupImageView()
-        setupConstraints()
-    }
-    
-    private func setupImageView() {
-        
-        guard let imageURL = imageName else { return }
-        
-        URLSession.shared.dataTask(with: URL(string: imageURL)!) { [weak self] (data, _, _) in
-            
-            if let data = data {
-                
-                DispatchQueue.main.async {
-                    
-                    self?.imageView.image = UIImage(data: data)
-                }
-            }
-        }.resume()
-    }
+         super.viewDidLoad()
+
+         view.backgroundColor = .white
+         title = titleText
+
+         view.addSubview(imageView)
+         imageView.image = image
+
+         setupConstraints()
+     }
     
     private func setupConstraints() {
         

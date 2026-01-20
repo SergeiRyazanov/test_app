@@ -1,8 +1,8 @@
-import Foundation
+import UIKit
 
 struct DataSourceForWithImageCell {
     
     var name: String
     var image: String
-    var openNewScreenHadler: (() -> Void)?
+    var openNewScreenHadler: ((UIImage) -> Void)?
 }
