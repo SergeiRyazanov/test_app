@@ -9,20 +9,12 @@ class WithTableScreen: UIViewController {
     lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.register(WithImageCell.self, forCellReuseIdentifier: WithImageCell.reuseID)
         tableView.register(WithButtonCell.self, forCellReuseIdentifier: WithButtonCell.reuseID)
         tableView.dataSource = self
         return tableView
     }()
     
     var colorFirstCell: UIColor = .lightGray
-        
-    lazy var dataSourceWithImageCell =
-    [DataSourceForWithImageCell(name: "Змея", image: "https://avatars.mds.yandex.net/get-yapic/36689/56jx33h1WxaVJpEoT2TOaAfI-1569754704/orig"),
-    DataSourceForWithImageCell(name: "Обезьяна", image: "https://distribution.faceit-cdn.net/images/3ce0f058-1e4e-4862-9bc7-8d0c70e000e9.jpeg"),
-    DataSourceForWithImageCell(name: "Тигр", image: "https://avatars.yandex.net/get-music-content/10099790/152eeed5.a.32071697-2/m1000x1000"),
-    DataSourceForWithImageCell(name: "Рыба", image:
-        "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1BhyN0.img?w=1000&h=1000&m=4&q=99")]
     
     lazy var dataSourceWithButtonCell = [DataSourceForWithButtonCell(title: "Я могу менять цвет",
                                                        
@@ -40,10 +32,39 @@ class WithTableScreen: UIViewController {
     })]
     //тут закончилась
     
+    //тут начинается коллекция
+    lazy var collectionView: UICollectionView = {
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layot)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.dataSource = self
+        collectionView.register(WithImageCell.self, forCellWithReuseIdentifier: WithImageCell.reuseID)
+        return collectionView
+    }()
+    
+    lazy var layot: UICollectionViewFlowLayout = {
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 20
+        layout.minimumInteritemSpacing = 10
+
+        return layout
+    }()
+    
+    lazy var dataSourceWithImageCell =
+    [DataSourceForWithImageCell(name: "Змея", image: "https://avatars.mds.yandex.net/get-yapic/36689/56jx33h1WxaVJpEoT2TOaAfI-1569754704/orig"),
+    DataSourceForWithImageCell(name: "Обезьяна", image: "https://distribution.faceit-cdn.net/images/3ce0f058-1e4e-4862-9bc7-8d0c70e000e9.jpeg"),
+    DataSourceForWithImageCell(name: "Тигр", image: "https://avatars.yandex.net/get-music-content/10099790/152eeed5.a.32071697-2/m1000x1000"),
+    DataSourceForWithImageCell(name: "Рыба", image:
+        "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA1BhyN0.img?w=1000&h=1000&m=4&q=99")]
+    //тут коллекция закончилась
+    
     override func viewDidLoad() {
         
         super.viewDidLoad()
         view.backgroundColor = .white
+        
         
         //кнопка возврата на первый экран
         forReturnButton.setImage(UIImage(systemName: "xmark"), for: .normal)
@@ -53,20 +74,28 @@ class WithTableScreen: UIViewController {
         
         //таблица
         view.addSubview(tableView)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
+        
+        //коллекция
+        view.addSubview(collectionView)
         
         setupConstraints()
     }
     
     private func setupConstraints() {
         
-        //таблица
         NSLayoutConstraint.activate([
             
+            //таблица
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: collectionView.topAnchor),
+            
+            //коллекция
+            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -80,32 +109,39 @@ extension WithTableScreen: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        dataSourceWithImageCell.count + dataSourceWithButtonCell.count
+        dataSourceWithButtonCell.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        if indexPath.row == 0 {
             
             let cell = tableView.dequeueReusableCell(withIdentifier: WithButtonCell.reuseID, for: indexPath) as! WithButtonCell
             let withButtonCell = dataSourceWithButtonCell[indexPath.row]
             cell.setupCell(post: withButtonCell)
             return cell
+    }
+}
+
+extension WithTableScreen: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+        dataSourceWithImageCell.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WithImageCell.reuseID,
+                                                      for: indexPath) as! WithImageCell
+        
+        let withImageCell = dataSourceWithImageCell[indexPath.row]
+        cell.setupCell(post: withImageCell)
+        cell.openNewScreenHandler = { [weak self] image in
             
-        } else {
-            
-            let cell = tableView.dequeueReusableCell(withIdentifier: WithImageCell.reuseID, for: indexPath) as! WithImageCell
-            let withImageCell = dataSourceWithImageCell[indexPath.row - 1]
-            cell.setupCell(post: withImageCell)
-            cell.openNewScreenHandler = { [weak self] image in
-                
-                let page = PageAboutCell()
-                page.titleText = withImageCell.name
-                page.image = image
-                self?.navigationController?.pushViewController(page, animated: true)
-            }
-            
-            return cell
+            let page = PageAboutCell()
+            page.titleText = withImageCell.name
+            page.image = image
+            self?.navigationController?.pushViewController(page, animated: true)
         }
+        
+        return cell
     }
 }

@@ -1,6 +1,6 @@
 import UIKit
 
-class WithImageCell: UITableViewCell {
+class WithImageCell: UICollectionViewCell {
         
     static var reuseID = "WithImageCell"
     
@@ -52,9 +52,9 @@ class WithImageCell: UITableViewCell {
         return $0
     }(UIActivityIndicatorView())
     
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    override init(frame: CGRect) {
         
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        super.init(frame: frame)
         openNewScreenButton.addTarget(self, action: #selector(openNewScreen), for: .touchUpInside)
         
         contentView.addSubview(cellColor)
@@ -88,6 +88,7 @@ class WithImageCell: UITableViewCell {
                 
                 image = UIImage(named: "reserveImage")
                 self?.downloadedImage = image
+                
                 DispatchQueue.main.async {
                     
                     self?.cellImage.image = image
@@ -107,11 +108,8 @@ class WithImageCell: UITableViewCell {
    }
    
    @objc private func openNewScreen() {
-       //сделать чтобы замыкание передавало картинку на второй экран
-       if let image = downloadedImage{
-           
-           openNewScreenHandler?(image)
-       }
+       
+       openNewScreenHandler?(downloadedImage!)
    }
     
     private func setupConstraints() {
